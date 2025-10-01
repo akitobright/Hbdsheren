@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birthday Surprise</title>
+  <style>
+    body {
+      background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+      text-align: center;
+      font-family: 'Comic Sans MS', cursive;
+      color: #fff;
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Stars */
+    .stars {
+      width: 2px;
+      height: 2px;
+      background: white;
+      position: absolute;
+      top: 0;
+      left: 0;
+      box-shadow: 
+        100px 200px white,
+        300px 400px white,
+        500px 100px white,
+        700px 250px white,
+        900px 300px white,
+        1200px 150px white,
+        1400px 500px white,
+        1600px 200px white;
+      animation: twinkle 2s infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.5; }
+      to { opacity: 1; }
+    }
+
+    /* Shooting stars */
+    .shooting-star {
+      position: absolute;
+      width: 2px;
+      height: 100px;
+      background: linear-gradient(white, transparent);
+      top: -100px;
+      left: 50%;
+      opacity: 0;
+    }
+    @keyframes shoot {
+      0% { transform: translate(0,0) rotate(45deg); opacity: 1; }
+      100% { transform: translate(1000px, 600px) rotate(45deg); opacity: 0; }
+    }
+
+    h1 {
+      font-size: 3em;
+      display: none;
+      animation: pop 0.5s ease forwards, glow 2s infinite alternate;
+    }
+    @keyframes pop {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #fff, 0 0 20px #ff9a9e, 0 0 30px #ff6f61; }
+      to { text-shadow: 0 0 20px #fff, 0 0 30px #fbc531, 0 0 40px #e84118; }
+    }
+
+    .balloons {
+      font-size: 4em;
+      margin: 20px 0;
+      display: none;
+      animation: float 2s infinite ease-in-out;
+    }
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+      100% { transform: translateY(0); }
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 12px;
+      background: #ff6f61;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+      z-index: 2;
+    }
+    button:hover {
+      background: #e84118;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    #wish, #from {
+      display: none;
+      font-size: 1.5em;
+      margin-top: 10px;
+      white-space: pre-line;
+    }
+
+    /* Typing animation */
+    .typing {
+      display: inline-block;
+      border-right: 2px solid #fff;
+      animation: blink 0.7s steps(2, start) infinite;
+    }
+    @keyframes blink {
+      to { border-color: transparent; }
+    }
+
+    .fade-in {
+      display: block !important;
+      animation: fade 2s ease forwards;
+    }
+    @keyframes fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* 📱 Responsive adjustments */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2em;
+      }
+      .balloons {
+        font-size: 2.5em;
+      }
+      button {
+        font-size: 1em;
+        padding: 10px 20px;
+      }
+      #wish, #from {
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  
+  <button onclick="showSurprise()">🎁 Click for a Surprise 🎁</button>
+  
+  <div id="surprise">
+    <div class="balloons">🎈🎉🎂🎉🎈</div>
+    <h1>Happy Birthday, Sheren! 💖</h1>
+    <p id="wish"></p>
+    <p id="from">From your best friend Arison 💕</p>
+    <div class="balloons">🎈🎉🎂🎉🎈</div>
+  </div>
+
+  <!-- Music -->
+  <audio id="music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
+
+  <!-- Confetti -->
+  <canvas id="confetti"></canvas>
+
+  <script>
+    function showSurprise() {
+      document.querySelector("button").style.display = "none";
+      document.querySelector("h1").style.display = "block";
+      document.querySelectorAll(".balloons").forEach(b => b.style.display = "block");
+      
+      typeMessage("I hope you enjoy your birthday, I miss you so much 💕✨", "wish");
+
+      setTimeout(() => {
+        document.getElementById("from").classList.add("fade-in");
+      }, 4000);
+
+      const music = document.getElementById("music");
+      music.play();
+
+      startConfetti();
+      startShootingStars();
+    }
+
+    // Typing effect
+    function typeMessage(message, elementId) {
+      const element = document.getElementById(elementId);
+      element.style.display = "block";
+      element.innerHTML = "";
+      let i = 0;
+      const typingInterval = setInterval(() => {
+        element.innerHTML = message.substring(0, i + 1) + '<span class="typing"></span>';
+        i++;
+        if (i === message.length) {
+          clearInterval(typingInterval);
+          element.innerHTML = message; // remove cursor at the end
+        }
+      }, 80); // speed
+    }
+
+    // Confetti Effect
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const confettiPieces = [];
+    for (let i = 0; i < 150; i++) {
+      confettiPieces.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        w: 10,
+        h: 20,
+        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+        speed: Math.random() * 3 + 2
+      });
+    }
+
+    function drawConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confettiPieces.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+      });
+    }
+
+    function updateConfetti() {
+      confettiPieces.forEach(p => {
+        p.y += p.speed;
+        if (p.y > canvas.height) {
+          p.y = -20;
+          p.x = Math.random() * canvas.width;
+        }
+      });
+    }
+
+    function loop() {
+      drawConfetti();
+      updateConfetti();
+      requestAnimationFrame(loop);
+    }
+
+    function startConfetti() {
+      loop();
+    }
+
+    // Shooting Stars
+    function startShootingStars() {
+      setInterval(() => {
+        let star = document.createElement("div");
+        star.classList.add("shooting-star");
+        star.style.left = Math.random() * window.innerWidth + "px";
+        star.style.top = Math.random() * window.innerHeight/2 + "px";
+        document.body.appendChild(star);
+
+        star.style.animation = "shoot 2s linear forwards";
+
+        setTimeout(() => {
+          star.remove();
+        }, 2000);
+      }, 2000);
+    }
+
+    // Resize canvas when window changes
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
